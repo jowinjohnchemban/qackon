@@ -1,4 +1,4 @@
-# Qackon Beacon
+# Qackon Beacon/GPS
 
 ## Overview
 
