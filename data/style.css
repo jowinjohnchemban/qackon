@@ -1,0 +1,301 @@
+/* Qackon UI — styled like field instrumentation, not a marketing page.
+   System fonts only: the setup flow runs inside the device's own captive
+   AP with zero internet access, so no CDN webfonts. */
+
+:root {
+  --bg:        #0B0E11;
+  --panel:     #141A20;
+  --panel-2:   #1B222A;
+  --line:      #262F38;
+  --text:      #E7ECF2;
+  --text-dim:  #7C8794;
+  --accent:    #FF6B1A;   /* armed / alert — distress-orange */
+  --signal:    #2DD4C4;   /* connectivity / GPS — sonar teal */
+  --danger:    #E4392E;
+
+  --mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Topbar ---------- */
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.topbar__id { display: flex; align-items: center; gap: 10px; }
+
+.topbar__mark {
+  width: 28px; height: 28px;
+  display: grid; place-items: center;
+  background: var(--accent);
+  color: #0B0E11;
+  font-weight: 800;
+  font-size: 15px;
+  border-radius: 6px;
+  letter-spacing: 0;
+}
+
+.topbar__name {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+}
+
+.topbar__links {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+.topbar__links span:nth-child(2n) { margin-right: 10px; }
+
+.dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dot--off { background: #3A4450; }
+.dot--on  { background: var(--signal); box-shadow: 0 0 6px var(--signal); }
+
+/* ---------- Layout ---------- */
+
+main {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px 16px 60px;
+}
+
+/* ---------- Signature element: the pulse ring ---------- */
+
+.panel--pulse {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 22px;
+}
+
+.pulse {
+  position: relative;
+  width: 84px; height: 84px;
+  flex: none;
+  display: grid; place-items: center;
+}
+
+.pulse__ring {
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid var(--text-dim);
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.pulse__core {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  color: transparent;
+  z-index: 2;
+  transition: background 0.3s;
+}
+
+/* Armed state animates the rings outward like a beacon sweep */
+.pulse.is-armed .pulse__core { background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+.pulse.is-armed .pulse__ring {
+  border-color: var(--accent);
+  animation: pulseOut 2.2s ease-out infinite;
+}
+.pulse.is-armed .pulse__ring:nth-child(2) { animation-delay: 0.7s; }
+.pulse.is-armed .pulse__ring:nth-child(3) { animation-delay: 1.4s; }
+
+@keyframes pulseOut {
+  0%   { transform: scale(0.3); opacity: 0.9; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse.is-armed .pulse__ring { animation: none; opacity: 0.4; }
+}
+
+.pulse__label {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pulse__state {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+.pulse.is-armed ~ .pulse__label .pulse__state,
+.is-armed-text { color: var(--accent); }
+
+/* ---------- Panels & cards ---------- */
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-bottom: 14px;
+}
+
+.panel__title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  margin: 0;
+  padding: 16px 18px 0;
+}
+
+.panel__sub {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  padding: 4px 18px 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.card__label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.card__value {
+  font-size: 20px;
+  font-weight: 600;
+}
+.card__value.mono { font-family: var(--mono); font-weight: 500; }
+
+.card__sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.mono { font-family: var(--mono); }
+
+/* ---------- Forms ---------- */
+
+.form {
+  padding: 14px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.field input[type="text"],
+.field input[type="password"],
+.field input[type="tel"],
+.field input[type="number"],
+.field input[type="file"] {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 9px 10px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: var(--sans);
+}
+
+.field input:focus {
+  outline: 2px solid var(--signal);
+  outline-offset: 1px;
+}
+
+.field--check {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.btn {
+  border: none;
+  border-radius: 7px;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.btn--save {
+  background: var(--signal);
+  color: #06201D;
+}
+.btn--save:active { transform: translateY(1px); }
+
+.btn--arm {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+.btn--arm.is-armed {
+  background: var(--accent);
+  color: #201200;
+  border-color: var(--accent);
+}
+
+.form__note {
+  font-size: 12px;
+  color: var(--signal);
+  min-height: 14px;
+  margin: 0;
+}
+
+.foot {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 11px;
+  padding: 20px 0 30px;
+  letter-spacing: 0.04em;
+}

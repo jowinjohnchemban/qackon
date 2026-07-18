@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Qackon</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar__id">
+      <span class="topbar__mark">Q</span>
+      <span class="topbar__name" id="deviceName">Qackon-Beacon</span>
+    </div>
+    <div class="topbar__links" id="linkStatus">
+      <span class="dot dot--off" id="dotWifi"></span><span>WiFi</span>
+      <span class="dot dot--off" id="dotGsm"></span><span>GSM</span>
+      <span class="dot dot--off" id="dotGps"></span><span>GPS</span>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="panel panel--pulse">
+      <div class="pulse" id="pulse">
+        <div class="pulse__ring"></div>
+        <div class="pulse__ring"></div>
+        <div class="pulse__ring"></div>
+        <div class="pulse__core" id="pulseCore">•</div>
+      </div>
+      <div class="pulse__label">
+        <span class="pulse__state" id="beaconState">DISARMED</span>
+        <button class="btn btn--arm" id="btnArm">Arm beacon</button>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <div class="card__label">Position</div>
+        <div class="card__value mono" id="fixCoords">— , —</div>
+        <div class="card__sub" id="fixMeta">no fix</div>
+      </div>
+      <div class="card">
+        <div class="card__label">Speed</div>
+        <div class="card__value mono" id="fixSpeed">0.0</div>
+        <div class="card__sub">km/h</div>
+      </div>
+      <div class="card">
+        <div class="card__label">Satellites</div>
+        <div class="card__value mono" id="fixSats">0</div>
+        <div class="card__sub">in view</div>
+      </div>
+      <div class="card">
+        <div class="card__label">Impact sensor</div>
+        <div class="card__value mono" id="imuMag">1.00 g</div>
+        <div class="card__sub">baseline 1.00 g</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2 class="panel__title">Setup</h2>
+      <form id="cfgForm" class="form">
+
+        <label class="field">
+          <span>Device name</span>
+          <input type="text" name="deviceName" maxlength="31">
+        </label>
+
+        <label class="field">
+          <span>Owner</span>
+          <input type="text" name="ownerName" maxlength="31">
+        </label>
+
+        <label class="field">
+          <span>Emergency contact (SMS)</span>
+          <input type="tel" name="emergencyContact" maxlength="19" placeholder="+1 555 010 1234">
+        </label>
+
+        <div class="field-row">
+          <label class="field">
+            <span>WiFi network</span>
+            <input type="text" name="wifiSSID" maxlength="31">
+          </label>
+          <label class="field">
+            <span>WiFi password</span>
+            <input type="password" name="wifiPass" maxlength="63" placeholder="leave blank to keep current">
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Cloud upload URL</span>
+          <input type="text" name="cloudURL" maxlength="127" placeholder="https://example.com/api/ping">
+        </label>
+
+        <div class="field-row">
+          <label class="field">
+            <span>Upload interval (sec)</span>
+            <input type="number" name="cloudIntervalSec" min="10" max="3600">
+          </label>
+          <label class="field">
+            <span>Impact threshold (g)</span>
+            <input type="number" name="motionThresholdG" min="0.1" max="8" step="0.1">
+          </label>
+        </div>
+
+        <label class="field field--check">
+          <input type="checkbox" name="gsmEnabled">
+          <span>Enable cellular module</span>
+        </label>
+
+        <label class="field field--check">
+          <input type="checkbox" name="beaconEnabled">
+          <span>Enable beacon transmitter</span>
+        </label>
+
+        <button type="submit" class="btn btn--save">Save settings</button>
+        <p class="form__note" id="formNote"></p>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2 class="panel__title">Firmware</h2>
+      <p class="panel__sub" id="fwVersion">version —</p>
+      <form id="otaForm" class="form">
+        <input type="file" name="firmware" accept=".bin" required>
+        <button type="submit" class="btn btn--save">Upload &amp; reboot</button>
+        <p class="form__note" id="otaNote"></p>
+      </form>
+    </section>
+
+  </main>
+
+  <footer class="foot">Qackon Beacon — open safety hardware</footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build-and-release:
+    name: Build and publish release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio
+          key: pio-${{ runner.os }}-${{ hashFiles('platformio.ini') }}
+
+      - name: Install PlatformIO
+        run: pip install --upgrade platformio
+
+      - name: Stamp firmware with tag version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          sed -i "s/QACKON_VERSION=\\\\\"[^\\\\\"]*\\\\\"/QACKON_VERSION=\\\\\"${VERSION}\\\\\"/" platformio.ini
+          echo "Building version ${VERSION}"
+
+      - name: Build firmware
+        run: pio run -e qackon
+
+      - name: Build LittleFS image
+        run: pio run -e qackon -t buildfs
+
+      - name: Collect release artifacts
+        run: |
+          mkdir -p release
+          cp .pio/build/qackon/firmware.bin     release/qackon-firmware-${GITHUB_REF_NAME}.bin
+          cp .pio/build/qackon/littlefs.bin      release/qackon-littlefs-${GITHUB_REF_NAME}.bin
+          cp .pio/build/qackon/bootloader.bin    release/qackon-bootloader-${GITHUB_REF_NAME}.bin
+          cp .pio/build/qackon/partitions.bin    release/qackon-partitions-${GITHUB_REF_NAME}.bin
+          cd release && sha256sum *.bin > SHA256SUMS.txt
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
+          generate_release_notes: true
+          body: |
+            ## Flashing
+
+            First-time flash (full erase, all four binaries at their offsets):
+
+            ```
+            esptool.py --chip esp32 write_flash \
+              0x1000  qackon-bootloader-${{ github.ref_name }}.bin \
+              0x8000  qackon-partitions-${{ github.ref_name }}.bin \
+              0x10000 qackon-firmware-${{ github.ref_name }}.bin \
+              0x290000 qackon-littlefs-${{ github.ref_name }}.bin
+            ```
+
+            Already-flashed devices can instead update over WiFi from the
+            dashboard's Firmware panel using `qackon-firmware-${{ github.ref_name }}.bin`
+            — the LittleFS image only needs reflashing when `data/` changes.
+
+            Verify downloads against `SHA256SUMS.txt`.

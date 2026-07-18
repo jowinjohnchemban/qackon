@@ -1,0 +1,43 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build firmware + filesystem
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio
+          key: pio-${{ runner.os }}-${{ hashFiles('platformio.ini') }}
+
+      - name: Install PlatformIO
+        run: pip install --upgrade platformio
+
+      - name: Build firmware
+        run: pio run -e qackon
+
+      - name: Build LittleFS image
+        run: pio run -e qackon -t buildfs
+
+      - name: Static analysis
+        run: pio check -e qackon --skip-packages --fail-on-defect=high
+        continue-on-error: true # surfaces findings without blocking the build yet
+
+      - name: Check web UI is valid JS
+        run: node --check data/script.js
